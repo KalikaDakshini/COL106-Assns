@@ -27,6 +27,21 @@ public class Calculator {
 			}
 			// Push operands into a second stack
 			else {
+				// Push left paranthesis onto stack and continue
+				if (token.equals("(")) {
+					opStack.push(token);
+					continue;
+				}
+				// Pop all the operands until left paren
+				else if (token.equals(")")) {
+					while (!opStack.top().equals("(")) {
+						tokenStack.push(opStack.pop());
+					}
+					opStack.pop();
+					continue;
+				}
+
+				// Check precedence and push operator
 				while (!opStack.isEmpty()
 						&& prec(token) < prec(opStack.top())) {
 					tokenStack.push(opStack.pop());
@@ -108,6 +123,7 @@ public class Calculator {
 		return result;
 	}
 
+	// Check if a string is numeric
 	private boolean isNumeric(String token) {
 		Pattern number = Pattern.compile("-?\\d+");
 		return number.matcher(token).matches();
@@ -115,7 +131,7 @@ public class Calculator {
 
 	public static void main(String[] args) {
 		Calculator c = new Calculator();
-		String expr = "2 + 3 - 5";
+		String expr = "3 * ( ( 4 + 6 ) * 9 + ( 5 * 7 ) )";
 		try {
 			String postfix = c.convertExpression(expr);
 			System.out.println(postfix);
