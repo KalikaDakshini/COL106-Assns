@@ -15,7 +15,48 @@ public class Calculator {
 	 * Convert a string from standard notation to postfix notation
 	 */
 	public String convertExpression(String s) throws InvalidExprException {
-		return s;
+		String[] tokens = s.split(" ");
+		MyStack<String> tokenStack = new MyStack<>();
+		MyStack<String> opStack = new MyStack<>();
+
+		// Shunting Yard Algorithm
+		for (String token : tokens) {
+			// Push numbers into one stack
+			if (isNumeric(token)) {
+				tokenStack.push(token);
+			}
+			// Push operands into a second stack
+			else {
+				while (!opStack.isEmpty()
+						&& prec(token) < prec(opStack.top())) {
+					tokenStack.push(opStack.pop());
+				}
+				opStack.push(token);
+			}
+		}
+
+		// Push any remaining operands into the token Stack
+		while (!opStack.isEmpty()) {
+			tokenStack.push(opStack.pop());
+		}
+
+		// Build the Token stack into a postfix string seperated by spaces
+		return makeString(tokenStack);
+	}
+
+	private int prec(String operand) {
+		int result = switch (operand.charAt(0)) {
+			case '-' -> 1;
+			case '+' -> 2;
+			case '*' -> 3;
+			default -> 0;
+		};
+		return result;
+	}
+
+	// Conctenate elements of the stack with spaces
+	private String makeString(StackInterface<String> s) {
+		return String.join(" ", s);
 	}
 
 	/**
@@ -54,6 +95,7 @@ public class Calculator {
 		return evalStack.top();
 	}
 
+	// Operate token on arguments
 	private Integer operate(String operate, Integer arg1, Integer arg2)
 			throws InvalidPostfixException {
 		Integer result = switch (operate.charAt(0)) {
@@ -73,14 +115,14 @@ public class Calculator {
 
 	public static void main(String[] args) {
 		Calculator c = new Calculator();
-		String expr = "4 6 + 9 * 5 7 * + 3 *";
-		int result = 0;
+		String expr = "2 + 3 - 5";
 		try {
-			result = c.evaluatePostfix(expr);
+			String postfix = c.convertExpression(expr);
+			System.out.println(postfix);
+			int result = c.evaluatePostfix(postfix);
 			System.out.printf("%s = %d\n", expr, result);
-		} catch (InvalidPostfixException e) {
+		} catch (Exception e) {
 			System.out.println("Invalid Expression");
 		}
-
 	}
 }
