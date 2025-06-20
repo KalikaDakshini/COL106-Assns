@@ -3,7 +3,7 @@ import java.util.Iterator;
 
 public class MyStack<T> implements StackInterface<T> {
 
-	private static int STACK_SIZE = 16;
+	private static int STACK_SIZE = 4;
 
 	private T[] arr;
 	private int size;
@@ -62,7 +62,9 @@ public class MyStack<T> implements StackInterface<T> {
 
 	@Override
 	public void push(T val) {
-		// TODO: Add resize functionality
+		if (this.size == this.arr.length) {
+			resize(this.size * 2);
+		}
 
 		this.arr[this.size] = val;
 		// Update size after push
@@ -70,9 +72,15 @@ public class MyStack<T> implements StackInterface<T> {
 
 	}
 
+	private void resize(int capacity) {
+		@SuppressWarnings("unchecked")
+		T[] newArr = (T[]) new Object[capacity];
+		System.arraycopy(this.arr, 0, newArr, 0, this.size);
+		this.arr = newArr;
+	}
+
 	@Override
 	public T pop() throws EmptyStackException {
-		// TODO: Add resize functionality
 		if (this.size == 0) {
 			throw new EmptyStackException();
 		}
@@ -82,6 +90,12 @@ public class MyStack<T> implements StackInterface<T> {
 		this.size = this.size - 1;
 		// Set popped entry to null
 		this.arr[size] = null;
+
+		// Shrink down the array if size is 25% of capacity
+		if (this.size > STACK_SIZE && this.size < this.arr.length / 4) {
+			resize(this.size * 2);
+		}
+
 		// Return the popped value
 		return retVal;
 	}
